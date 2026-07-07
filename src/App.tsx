@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, Fragment } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   BookOpen,
@@ -104,6 +104,13 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部分类');
   const [sortBy, setSortBy] = useState<'default' | 'title' | 'newest'>('default');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Reset pagination to first page when search filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, sortBy]);
   
   // Modals & Drawer state
   const [showAddEditModal, setShowAddEditModal] = useState(false);
@@ -377,6 +384,12 @@ export default function App() {
     }
     return 0; // default (manual order in storage)
   });
+
+  const paginatedBooks = sortedBooks.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const totalPages = Math.ceil(sortedBooks.length / itemsPerPage);
 
   // --- Global stats ---
   const totalBookCount = books.reduce((acc, b) => acc + b.totalCopies, 0);
@@ -890,9 +903,10 @@ export default function App() {
 
             {/* BOOKS GRID */}
             {sortedBooks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 <AnimatePresence mode="popLayout">
-                  {sortedBooks.map((book) => {
+                  {paginatedBooks.map((book) => {
                     return (
                       <motion.div
                         layout
@@ -1025,6 +1039,85 @@ export default function App() {
                   })}
                 </AnimatePresence>
               </div>
+
+              {/* PAGINATION BAR */}
+              {totalPages > 1 && (
+                <div className={`mt-8 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t ${styles.divider} text-xs font-sans`}>
+                  <div className="opacity-70">
+                    共 <span className="font-semibold">{sortedBooks.length}</span> 本图书 | 每页 <span className="font-semibold">{itemsPerPage}</span> 本 | 第 <span className="font-semibold">{currentPage}</span> / {totalPages} 页
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(1)}
+                      className={`px-2.5 py-1.5 text-[11px] rounded transition-all cursor-pointer ${
+                        currentPage === 1 
+                          ? 'opacity-40 cursor-not-allowed' 
+                          : styles.btnSecondary
+                      }`}
+                    >
+                      首页
+                    </button>
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      className={`px-2.5 py-1.5 text-[11px] rounded transition-all cursor-pointer ${
+                        currentPage === 1 
+                          ? 'opacity-40 cursor-not-allowed' 
+                          : styles.btnSecondary
+                      }`}
+                    >
+                      上一页
+                    </button>
+
+                    {/* Render page numbers around the current page */}
+                    {Array.from({ length: totalPages }, (_, idx) => idx + 1)
+                      .filter(p => Math.abs(p - currentPage) <= 2 || p === 1 || p === totalPages)
+                      .map((p, index, arr) => {
+                        const showEllipsis = index > 0 && p - arr[index - 1] > 1;
+                        return (
+                          <Fragment key={p}>
+                            {showEllipsis && <span className="px-1 text-slate-400">...</span>}
+                            <button
+                              onClick={() => setCurrentPage(p)}
+                              className={`px-3 py-1.5 rounded transition-all cursor-pointer font-medium ${
+                                currentPage === p
+                                  ? styles.btnPrimary
+                                  : styles.btnSecondary
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          </Fragment>
+                        );
+                      })}
+
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      className={`px-2.5 py-1.5 text-[11px] rounded transition-all cursor-pointer ${
+                        currentPage === totalPages 
+                          ? 'opacity-40 cursor-not-allowed' 
+                          : styles.btnSecondary
+                      }`}
+                    >
+                      下一页
+                    </button>
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={`px-2.5 py-1.5 text-[11px] rounded transition-all cursor-pointer ${
+                        currentPage === totalPages 
+                          ? 'opacity-40 cursor-not-allowed' 
+                          : styles.btnSecondary
+                      }`}
+                    >
+                      尾页
+                    </button>
+                  </div>
+                </div>
+              )}
+              </>
             ) : (
               // Empty Search / Filter state
               <div className={`p-12 text-center rounded-xl border ${styles.card}`}>
@@ -1053,17 +1146,7 @@ export default function App() {
               </div>
             )}
 
-            {filteredBooks.length > 0 && (
-              <div className="flex justify-center pt-10 pb-4">
-                <button
-                  onClick={handleOpenAddModal}
-                  className={`w-full max-w-lg py-3.5 px-6 rounded-xl text-sm font-bold flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer ${styles.btnPrimary}`}
-                >
-                  <Plus className="w-5 h-5 animate-pulse" />
-                  <span>录入新图书 (Upload Book)</span>
-                </button>
-              </div>
-            )}
+
 
           </div>
 
