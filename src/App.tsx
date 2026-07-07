@@ -83,16 +83,21 @@ export default function App() {
   const [books, setBooks] = useState<Book[]>([]);
   const [template, setTemplate] = useState<DesignTemplate>('editorial');
 
-  // Base default categories and shelf locations
+  // Base default categories and shelf locations for form autocomplete suggestions
   const defaultCategories = ['学术写作', '科学技术', '开放科学', '经管励志', '人文社科', '文学艺术'];
   const defaultShelves = ['A架-上层', 'A架-中层', 'A架-下层', 'B架-上层', 'B架-下层', 'C架-新书区'];
 
-  // Dynamically compute the categories from existing books + default categories
-  const currentCategories = Array.from(new Set([
-    ...defaultCategories,
-    ...books.map(b => b.category).filter(Boolean)
-  ]));
+  // Dynamically compute the categories strictly from existing books
+  const currentCategories = Array.from(new Set(
+    books.map(b => b.category).filter(Boolean)
+  ));
   const dynamicCategories = ['全部分类', ...currentCategories];
+
+  // For book edit/add suggestions, merge existing categories with defaults
+  const formSuggestionCategories = Array.from(new Set([
+    ...defaultCategories,
+    ...currentCategories
+  ]));
 
   // Dynamically compute the shelf locations from existing books + default shelves
   const dynamicShelves = Array.from(new Set([
@@ -1309,7 +1314,7 @@ export default function App() {
                     className={`w-full p-2 text-sm rounded border outline-none ${styles.input}`}
                   />
                   <datalist id="categories-list">
-                    {dynamicCategories.filter(c => c !== '全部分类').map((cat) => (
+                    {formSuggestionCategories.map((cat) => (
                       <option key={cat} value={cat} />
                     ))}
                   </datalist>
