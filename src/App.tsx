@@ -105,7 +105,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('全部分类');
   const [sortBy, setSortBy] = useState<'default' | 'title' | 'newest'>('default');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
 
   // Reset pagination to first page when search filters change
   useEffect(() => {
@@ -1044,7 +1044,7 @@ export default function App() {
               {totalPages > 1 && (
                 <div className={`mt-8 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t ${styles.divider} text-xs font-sans`}>
                   <div className="opacity-70">
-                    共 <span className="font-semibold">{sortedBooks.length}</span> 本图书 | 每页 <span className="font-semibold">{itemsPerPage}</span> 本 | 第 <span className="font-semibold">{currentPage}</span> / {totalPages} 页
+                    共 <span className="font-semibold">{sortedBooks.length}</span> 本图书 | 第 <span className="font-semibold">{currentPage}</span> / {totalPages} 页
                   </div>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <button
