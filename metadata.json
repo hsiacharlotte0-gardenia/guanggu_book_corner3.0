@@ -1,0 +1,6 @@
+{
+  "name": "MDPI Guanggu Office Book Corner",
+  "description": "MDPI武汉光谷办公室图书角的图书管理与借阅系统，支持图书录入、搜索过滤、便捷借还以及联系人信息展示。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
